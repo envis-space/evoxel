@@ -1,10 +1,10 @@
+use crate::data_frame_utils;
 use crate::error::Error;
 use crate::info::VoxelGridInfo;
 use chrono::{DateTime, Utc};
 use ecoord::{FrameId, ReferenceFrames, TransformId};
 use nalgebra::Point3;
-
-use crate::data_frame_utils;
+use polars::datatypes::PlSmallStr;
 use polars::prelude::DataFrame;
 use rayon::prelude::*;
 
@@ -70,21 +70,27 @@ impl VoxelGrid {
     pub fn min_index(&self) -> Point3<i64> {
         let index_x: i64 = self
             .voxel_data
-            .column(VoxelDataColumnNames::X.as_str())
+            .column(VoxelDataColumnType::X.as_str())
+            .unwrap()
+            .as_series()
             .unwrap()
             .min()
             .unwrap()
             .unwrap();
         let index_y: i64 = self
             .voxel_data
-            .column(VoxelDataColumnNames::Y.as_str())
+            .column(VoxelDataColumnType::Y.as_str())
+            .unwrap()
+            .as_series()
             .unwrap()
             .min()
             .unwrap()
             .unwrap();
         let index_z: i64 = self
             .voxel_data
-            .column(VoxelDataColumnNames::Z.as_str())
+            .column(VoxelDataColumnType::Z.as_str())
+            .unwrap()
+            .as_series()
             .unwrap()
             .min()
             .unwrap()
@@ -111,21 +117,27 @@ impl VoxelGrid {
     pub fn max_index(&self) -> Point3<i64> {
         let index_x: i64 = self
             .voxel_data
-            .column(VoxelDataColumnNames::X.as_str())
+            .column(VoxelDataColumnType::X.as_str())
+            .unwrap()
+            .as_series()
             .unwrap()
             .max()
             .unwrap()
             .unwrap();
         let index_y: i64 = self
             .voxel_data
-            .column(VoxelDataColumnNames::Y.as_str())
+            .column(VoxelDataColumnType::Y.as_str())
+            .unwrap()
+            .as_series()
             .unwrap()
             .max()
             .unwrap()
             .unwrap();
         let index_z: i64 = self
             .voxel_data
-            .column(VoxelDataColumnNames::Z.as_str())
+            .column(VoxelDataColumnType::Z.as_str())
+            .unwrap()
+            .as_series()
             .unwrap()
             .max()
             .unwrap()
@@ -155,19 +167,19 @@ impl VoxelGrid {
     pub fn get_all_cell_indices_in_local_frame(&self) -> Vec<Point3<i64>> {
         let x_series = self
             .voxel_data
-            .column(VoxelDataColumnNames::X.as_str())
+            .column(VoxelDataColumnType::X.as_str())
             .unwrap()
             .i64()
             .unwrap();
         let y_series = self
             .voxel_data
-            .column(VoxelDataColumnNames::Y.as_str())
+            .column(VoxelDataColumnType::Y.as_str())
             .unwrap()
             .i64()
             .unwrap();
         let z_series = self
             .voxel_data
-            .column(VoxelDataColumnNames::Z.as_str())
+            .column(VoxelDataColumnType::Z.as_str())
             .unwrap()
             .i64()
             .unwrap();
@@ -188,7 +200,8 @@ impl VoxelGrid {
 
     pub fn get_all_center_points_in_local_frame(&self) -> Vec<Point3<f64>> {
         let all_indices = self.get_all_cell_indices_in_local_frame();
-        let all_center_points = all_indices
+
+        all_indices
             .par_iter()
             .map(|c| {
                 Point3::new(
@@ -197,15 +210,13 @@ impl VoxelGrid {
                     self.info.resolution * c.z as f64,
                 )
             })
-            .collect();
-
-        all_center_points
+            .collect()
     }
 
     pub fn get_cell_index(&self, row_index: usize) -> Point3<i64> {
         let index_x: i64 = self
             .voxel_data
-            .column(VoxelDataColumnNames::X.as_str())
+            .column(VoxelDataColumnType::X.as_str())
             .unwrap()
             .i64()
             .unwrap()
@@ -213,7 +224,7 @@ impl VoxelGrid {
             .unwrap();
         let index_y: i64 = self
             .voxel_data
-            .column(VoxelDataColumnNames::Y.as_str())
+            .column(VoxelDataColumnType::Y.as_str())
             .unwrap()
             .i64()
             .unwrap()
@@ -221,7 +232,7 @@ impl VoxelGrid {
             .unwrap();
         let index_z: i64 = self
             .voxel_data
-            .column(VoxelDataColumnNames::Z.as_str())
+            .column(VoxelDataColumnType::Z.as_str())
             .unwrap()
             .i64()
             .unwrap()
@@ -278,21 +289,36 @@ impl VoxelGrid {
     }
 }
 
+const COLUMN_NAME_X_STR: &str = "x";
+const COLUMN_NAME_Y_STR: &str = "y";
+const COLUMN_NAME_Z_STR: &str = "z";
+const COLUMN_NAME_COUNT_STR: &str = "count";
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum VoxelDataColumnNames {
+pub enum VoxelDataColumnType {
+    /// X index (mandatory)
     X,
+    /// Y index (mandatory)
     Y,
+    /// Z index (mandatory)
     Z,
+    /// Count
     Count,
 }
 
-impl VoxelDataColumnNames {
+impl VoxelDataColumnType {
     pub fn as_str(&self) -> &'static str {
         match self {
-            VoxelDataColumnNames::X => "x",
-            VoxelDataColumnNames::Y => "y",
-            VoxelDataColumnNames::Z => "z",
-            VoxelDataColumnNames::Count => "count",
+            VoxelDataColumnType::X => COLUMN_NAME_X_STR,
+            VoxelDataColumnType::Y => COLUMN_NAME_Y_STR,
+            VoxelDataColumnType::Z => COLUMN_NAME_Z_STR,
+            VoxelDataColumnType::Count => COLUMN_NAME_COUNT_STR,
         }
+    }
+}
+
+impl From<VoxelDataColumnType> for PlSmallStr {
+    fn from(value: VoxelDataColumnType) -> Self {
+        value.as_str().into()
     }
 }

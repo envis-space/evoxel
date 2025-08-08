@@ -13,4 +13,4 @@ pub use crate::voxel_grid::VoxelGrid;
 pub use crate::info::VoxelGridInfo;
 
 #[doc(inline)]
-pub use crate::voxel_grid::VoxelDataColumnNames;
+pub use crate::voxel_grid::VoxelDataColumnType;

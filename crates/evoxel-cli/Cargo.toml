@@ -9,8 +9,10 @@ description = "CLI tool for processing 3D voxel grids."
 
 
 [dependencies]
-evoxel = { version = "0.0.1-alpha.4", path = "../evoxel" }
+evoxel = { version = "0.0.1-alpha.8", path = "../evoxel" }
 
+thiserror = { workspace = true }
+anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }

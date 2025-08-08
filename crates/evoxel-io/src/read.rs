@@ -1,10 +1,10 @@
 use crate::document::EvoxelInfoDocument;
 use crate::error::Error;
 use crate::{FILE_NAME_ECOORD, FILE_NAME_INFO, FILE_NAME_VOXEL_DATA_UNCOMPRESSED};
-use evoxel_core::voxel_grid::VoxelGrid;
 use evoxel_core::VoxelGridInfo;
+use evoxel_core::voxel_grid::VoxelGrid;
 use polars::prelude::LazyFileListReader;
-use polars::prelude::{all, LazyCsvReader};
+use polars::prelude::{LazyCsvReader, all};
 use std::fs;
 use std::path::{Path, PathBuf};
 

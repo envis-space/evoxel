@@ -1,18 +1,18 @@
 use crate::Error;
-use evoxel_core::{VoxelDataColumnNames, VoxelGrid};
+use evoxel_core::{VoxelDataColumnType, VoxelGrid};
 use nalgebra::Point3;
 
 use polars::frame::DataFrame;
 
 use crate::Error::LowerCornerMustBeBelowUpperCorner;
-use polars::prelude::{all, col, len, ChunkCompare, IntoLazy};
+use polars::prelude::{ChunkCompareIneq, IntoLazy, all, col, len};
 
 pub fn aggregate_by_index(voxel_grid: &VoxelGrid) -> Result<VoxelGrid, Error> {
     let voxel_data = voxel_grid.voxel_data();
     let partition_columns = vec![
-        VoxelDataColumnNames::X.as_str(),
-        VoxelDataColumnNames::Y.as_str(),
-        VoxelDataColumnNames::Z.as_str(),
+        VoxelDataColumnType::X.as_str(),
+        VoxelDataColumnType::Y.as_str(),
+        VoxelDataColumnType::Z.as_str(),
     ];
 
     let partitioned: DataFrame = voxel_data
@@ -53,7 +53,7 @@ pub fn explode(voxel_grid: &VoxelGrid) -> Result<VoxelGrid, Error> {
         .get_columns()
         .iter()
         .filter(|s| s.dtype().inner_dtype().is_some()) // if contains inner, it's a list
-        .map(|s| s.name())
+        .map(|s| s.name().as_str())
         .collect();
 
     let df: DataFrame = voxel_data
@@ -75,7 +75,8 @@ pub fn filter_by_count(voxel_grid: &VoxelGrid, minimum: usize) -> Result<VoxelGr
     let voxel_data = voxel_grid.voxel_data().clone();
 
     let mask = voxel_data
-        .column(VoxelDataColumnNames::Count.as_str())?
+        .column(VoxelDataColumnType::Count.as_str())?
+        .as_materialized_series()
         .gt_eq(minimum as i32)?;
 
     let filtered_voxel_data = voxel_data.filter(&mask)?;
@@ -102,19 +103,19 @@ pub fn filter_by_index_bounds(
     let filtered_voxel_data = voxel_data
         .lazy()
         .filter(
-            col(VoxelDataColumnNames::X.as_str())
+            col(VoxelDataColumnType::X.as_str())
                 .gt_eq(lower_corner.x)
-                .and(col(VoxelDataColumnNames::X.as_str()).lt_eq(upper_corner.x)),
+                .and(col(VoxelDataColumnType::X.as_str()).lt_eq(upper_corner.x)),
         )
         .filter(
-            col(VoxelDataColumnNames::Y.as_str())
+            col(VoxelDataColumnType::Y.as_str())
                 .gt_eq(lower_corner.y)
-                .and(col(VoxelDataColumnNames::Y.as_str()).lt_eq(upper_corner.y)),
+                .and(col(VoxelDataColumnType::Y.as_str()).lt_eq(upper_corner.y)),
         )
         .filter(
-            col(VoxelDataColumnNames::Z.as_str())
+            col(VoxelDataColumnType::Z.as_str())
                 .gt_eq(lower_corner.z)
-                .and(col(VoxelDataColumnNames::Z.as_str()).lt_eq(upper_corner.z)),
+                .and(col(VoxelDataColumnType::Z.as_str()).lt_eq(upper_corner.z)),
         )
         .collect()?;
     let filtered_voxel_grid = VoxelGrid::new(

@@ -12,7 +12,7 @@ description = "Core primitives and operations for processing 3D voxel grids."
 ecoord = { workspace = true }
 
 thiserror = { workspace = true }
-polars = { workspace = true, features = ["lazy", "parquet", "ndarray", "rows"] }
+polars = { workspace = true, features = ["lazy", "parquet", "ndarray", "rows", "strings"] }
 ndarray = { workspace = true }
 rayon = { workspace = true }
 nalgebra = { workspace = true }

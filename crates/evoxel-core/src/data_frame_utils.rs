@@ -1,5 +1,5 @@
 use crate::Error::{ColumnNameMisMatch, NoData, TypeMisMatch};
-use crate::{Error, VoxelDataColumnNames, VoxelGridInfo};
+use crate::{Error, VoxelDataColumnType, VoxelGridInfo};
 use ecoord::ReferenceFrames;
 use polars::datatypes::DataType;
 use polars::frame::DataFrame;
@@ -14,13 +14,13 @@ pub fn check_data_integrity(
     }
 
     let column_names = voxel_data.get_column_names();
-    if column_names[0] != VoxelDataColumnNames::X.as_str() {
+    if column_names[0] != VoxelDataColumnType::X.as_str() {
         return Err(ColumnNameMisMatch);
     }
-    if column_names[1] != VoxelDataColumnNames::Y.as_str() {
+    if column_names[1] != VoxelDataColumnType::Y.as_str() {
         return Err(ColumnNameMisMatch);
     }
-    if column_names[2] != VoxelDataColumnNames::Z.as_str() {
+    if column_names[2] != VoxelDataColumnType::Z.as_str() {
         return Err(ColumnNameMisMatch);
     }
 

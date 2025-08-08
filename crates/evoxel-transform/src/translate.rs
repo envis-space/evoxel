@@ -1,16 +1,16 @@
-use evoxel_core::{VoxelDataColumnNames, VoxelGrid};
+use evoxel_core::{VoxelDataColumnType, VoxelGrid};
 use nalgebra::Vector3;
 
 pub fn translate(voxel_grid: &VoxelGrid, translation: Vector3<i64>) -> VoxelGrid {
     let mut translated_data = voxel_grid.voxel_data().clone();
     translated_data
-        .apply(VoxelDataColumnNames::X.as_str(), |x| x + translation.x)
+        .apply(VoxelDataColumnType::X.as_str(), |x| x + translation.x)
         .expect("TODO: panic message");
     translated_data
-        .apply(VoxelDataColumnNames::Y.as_str(), |y| y + translation.y)
+        .apply(VoxelDataColumnType::Y.as_str(), |y| y + translation.y)
         .expect("TODO: panic message");
     translated_data
-        .apply(VoxelDataColumnNames::Z.as_str(), |z| z + translation.z)
+        .apply(VoxelDataColumnType::Z.as_str(), |z| z + translation.z)
         .expect("TODO: panic message");
 
     let info = voxel_grid.info().clone();

@@ -32,7 +32,7 @@
 //! - [parry3d_f64::transformation::voxelization](https://docs.rs/parry3d-f64/latest/parry3d_f64/transformation/voxelization/index.html)
 //! - [octomap](https://github.com/OctoMap/octomap)
 
-pub use evoxel_core::{Error, VoxelDataColumnNames, VoxelGrid, VoxelGridInfo};
+pub use evoxel_core::{Error, VoxelDataColumnType, VoxelGrid, VoxelGridInfo};
 
 pub use evoxel_io as io;
 
